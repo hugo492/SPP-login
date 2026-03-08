@@ -1,47 +1,77 @@
-import streamlit as st
+import streamlit as stimport streamlit as st
 import pandas as pd
 
-# 1. CONFIGURAÇÃO DA PÁGINA
+# 1. CONFIGURAÇÃO DO SISTEMA
 st.set_page_config(page_title="SPP - SISTEMA DE PRECIFICAÇÃO PRO", layout="wide")
 
-# 2. CONEXÃO COM A PLANILHA (Substitua pelo link da sua planilha em formato CSV)
-# Dica: No Google Sheets, vá em Arquivo > Compartilhar > Publicar na Web > Valores separados por vírgula (.csv)
-URL_PLANILHA = "SUA_URL_DA_PLANILHA_EM_CSV_AQUI"
+# Link da sua planilha Google (em formato CSV)
+# Para gerar: Arquivo > Compartilhar > Publicar na Web > Escolha "Valores separados por vírgula (.csv)"
+URL_PLANILHA = "SUA_URL_DA_PLANILHA_CSV_AQUI"
 
-def verificar_assinante(email_digitado):
+def verificar_acesso(email_digitado):
     try:
         df = pd.read_csv(URL_PLANILHA)
-        # Transforma tudo em minúsculo para evitar erro de digitação
-        lista_emails = df['email'].str.lower().str.strip().tolist()
-        return email_digitado.lower().strip() in lista_emails
+        lista_autorizada = df['email'].str.lower().str.strip().tolist()
+        return email_digitado.lower().strip() in lista_autorizada
     except:
         return False
 
-# 3. LOGIN NA BARRA LATERAL
-st.sidebar.title("🔐 PORTAL UNIPLENO TECH")
-email_user = st.sidebar.text_input("E-mail de Cadastro")
-senha_mestre = st.sidebar.text_input("Chave do Sistema", type="password")
+# 2. INTERFACE DE LOGIN (BARRA LATERAL)
+st.sidebar.image("https://spp.uniplenotech.com.br/wp-content/uploads/2024/02/logo-spp.png", width=150) # Opcional: Sua logo
+st.sidebar.title("🔐 ÁREA DO ASSINANTE")
 
-if verificar_assinante(email_user) and senha_mestre == "HUGO2026":
+email_user = st.sidebar.text_input("E-mail de Compra", placeholder="exemplo@email.com")
+senha_mestre = st.sidebar.text_input("Chave de Ativação", type="password")
+
+# --- VALIDAÇÃO DE ACESSO ---
+if verificar_acesso(email_user) and senha_mestre == "HUGO2026":
     
-    st.sidebar.success(f"Assinatura Ativa: {email_user}")
+    st.sidebar.success(f"✅ Acesso Liberado!")
     
-    # --- INÍCIO DO SISTEMA (TUDO O QUE VOCÊ JÁ TINHA) ---
+    # ---------------------------------------------------------
+    # TODO O SEU CÓDIGO DA CALCULADORA (PREVIEW, CÁLCULOS, ETC)
+    # ---------------------------------------------------------
     st.title("🚀 SPP - SISTEMA DE PRECIFICAÇÃO PRO")
     
-    # Preview Animado
+    # Exemplo do início do seu sistema
     texto_preview = st.text_input("Texto do Letreiro", value="TEXTO LETREIRO").upper()
-    
-    # (Inserir aqui todo o resto do código de CSS, cálculos e seletores)
-    st.markdown("""<style> /* Seu CSS de Neon aqui */ </style>""", unsafe_allow_html=True)
-    
-    # Exemplo de Seletor que já começa como você pediu
-    led_dict = {"Sem Iluminação": 0, "LED Branco": 45, "LED RGB": 75}
-    led_sel = st.selectbox("Iluminação LED", list(led_dict.keys()), index=0)
-
-    # ... RESTANTE DO CÓDIGO TÉCNICO ...
+    # ... (restante do código técnico aqui) ...
 
 else:
-    if email_user:
-        st.sidebar.error("❌ Acesso Negado. Verifique seu pagamento em spp.uniplenotech.com.br")
+    # --- TELA DE BLOQUEIO E DIRECIONAMENTO PARA PAGAMENTO ---
+    st.title("🔒 SISTEMA RESTRITO")
+    
+    col_venda, _ = st.columns([2, 1])
+    
+    with col_venda:
+        st.warning("### ⚠️ Assinatura não identificada ou pendente.")
+        st.write("""
+            Para utilizar o **SPP - Sistema de Precificação Pro**, você precisa de uma assinatura ativa. 
+            Com ela, você terá acesso a:
+            - ✅ Cálculo exato de custo de energia e materiais por região.
+            - ✅ Preview animado com efeito Neon/RGB.
+            - ✅ Gerador de orçamentos profissionais em PDF.
+        """)
+        
+        # BOTÃO DE DIRECIONAMENTO
+        st.markdown(f"""
+            <a href="https://spp.uniplenotech.com.br/" target="_blank">
+                <button style="
+                    background-color: #22c55e; 
+                    color: white; 
+                    padding: 15px 30px; 
+                    border: none; 
+                    border-radius: 8px; 
+                    font-size: 18px; 
+                    font-weight: bold; 
+                    cursor: pointer;
+                    width: 100%;">
+                    🚀 QUERO ASSINAR AGORA E LIBERAR MEU ACESSO
+                </button>
+            </a>
+        """, unsafe_allow_html=True)
+        
+        st.info("Já é assinante? Insira seu e-mail e chave na barra lateral à esquerda.")
+
+    st.sidebar.info("Dúvidas? Entre em contato com o suporte Unipleno.")
     st.warning("🔒 Área restrita. Por favor, faça login para calcular seus orçamentos.")
