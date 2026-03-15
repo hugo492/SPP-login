@@ -8,7 +8,7 @@ st.set_page_config(
     layout="wide"
 )
 
-# --- ESTILO CSS (Layout Dark Moderno conforme a imagem) ---
+# --- ESTILO CSS (Layout Dark Moderno - Centralizado) ---
 st.markdown("""
     <style>
     .stApp { background-color: #0b1117; color: #e6edf3; }
@@ -23,7 +23,7 @@ st.markdown("""
         margin-bottom: 15px;
     }
 
-    h3 { font-size: 1rem !important; color: #8b949e !important; text-transform: uppercase; margin-bottom: 15px !important; }
+    h3 { font-size: 1rem !important; color: #8b949e !important; text-transform: uppercase; margin-bottom: 10px !important; }
 
     /* Card de Orçamento Lateral */
     .orcamento-card {
@@ -35,18 +35,18 @@ st.markdown("""
         margin-bottom: 20px;
     }
 
-    .stButton>button { width: 100%; border-radius: 10px; font-weight: bold; }
+    .stButton>button { width: 100%; border-radius: 10px; font-weight: bold; background-color: #238636; color: white; border: none; }
     
     /* Regras para Impressão PDF */
     @media print {
         section[data-testid="stSidebar"], .stButton, header, footer, [data-testid="stToolbar"] { display: none !important; }
         .block-container { max-width: 100% !important; margin: 0 !important; }
-        .orcamento-card { border: 2px solid #000 !important; color: #000 !important; background: white !important; }
+        .orcamento-card { border: 2px solid #000 !important; color: #000 !important; background: white !important; -webkit-print-color-adjust: exact; }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 2. BANCO DE DADOS E VALIDAÇÃO
+# 2. BANCO DE DADOS E VALIDAÇÃO (LOGIN)
 URL_PLANILHA = "SUA_URL_DA_PLANILHA_CSV_AQUI"
 
 def verificar_acesso(email):
@@ -67,53 +67,29 @@ acesso_liberado = is_admin or (verificar_acesso(email_user) and senha_mestre == 
 if acesso_liberado:
     st.sidebar.success("✅ Acesso Liberado")
     
-    # DICIONÁRIO COMPLETO DE ESTADOS (ADICIONADOS OS QUE FALTAVAM)
-    base_regional = {
-        "AC - Energisa": [1.05, 1.30], "AL - Equatorial": [0.94, 1.10], "AM - Amazonas": [1.02, 1.25],
-        "AP - CEA": [0.98, 1.15], "BA - Coelba": [0.92, 1.05], "CE - Enel": [0.94, 1.10],
-        "DF - Neoenergia": [0.82, 1.05], "ES - EDP": [0.86, 1.01], "GO - Equatorial": [0.85, 1.02],
-        "MA - Equatorial": [0.96, 1.15], "MG - Cemig": [0.91, 1.00], "MS - Energisa": [0.93, 1.08],
-        "MT - Energisa": [0.96, 1.12], "PA - Equatorial": [1.05, 1.20], "PB - Energisa": [0.88, 1.08],
-        "PE - Neoenergia": [0.89, 1.08], "PI - Equatorial": [0.95, 1.12], "PR - Copel": [0.78, 0.98],
-        "RJ - Light": [0.98, 1.02], "RN - Neoenergia": [0.87, 1.08], "RO - Energisa": [0.99, 1.20],
-        "RR - Roraima": [1.08, 1.40], "RS - Equatorial": [0.88, 1.03], "SC - Celesc": [0.76, 0.98],
-        "SE - Energisa": [0.89, 1.10], "SP - Enel": [0.84, 1.00], "TO - Energisa": [0.96, 1.15]
+    # DICIONÁRIO COMPLETO DE IMPRESSORAS
+    impressoras = {
+        "Anycubic": [
+            {"n": "Kobra 3 Max", "f": 0.95, "w": 550},
+            {"n": "Kobra 2 Max", "f": 1.0, "w": 500},
+            {"n": "Kobra 2 Plus", "f": 1.05, "w": 450}
+        ],
+        "Bambu Lab": [
+            {"n": "X1-Carbon", "f": 0.85, "w": 350},
+            {"n": "P1S", "f": 0.88, "w": 350},
+            {"n": "A1", "f": 0.92, "w": 300}
+        ],
+        "Creality": [
+            {"n": "K1 Max", "f": 0.9, "w": 1000},
+            {"n": "Ender 3 V3", "f": 1.1, "w": 350}
+        ],
+        "Elegoo": [
+            {"n": "Neptune 4 Max", "f": 0.95, "w": 500},
+            {"n": "Neptune 4 Plus", "f": 0.98, "w": 480}
+        ]
     }
 
-    impressoras = {
-    "Anycubic": [
-        {"n": "Kobra 3 Max", "f": 0.95, "w": 550},
-        {"n": "Kobra 2 Max", "f": 1.0, "w": 500},
-        {"n": "Kobra 2 Plus", "f": 1.05, "w": 450},
-        {"n": "Kobra Neo", "f": 1.3, "w": 350}
-    ],
-    "Elegoo": [
-        {"n": "Neptune 4 Max", "f": 0.95, "w": 500},
-        {"n": "Neptune 4 Plus", "f": 0.98, "w": 480},
-        {"n": "Neptune 4 Pro", "f": 1.02, "w": 400}
-    ],
-    "Bambu Lab": [
-        {"n": "X1-Carbon", "f": 0.85, "w": 350},
-        {"n": "P1S", "f": 0.88, "w": 350},
-        {"n": "A1", "f": 0.92, "w": 300}
-    ],
-    "Creality": [
-        {"n": "K1 Max", "f": 0.9, "w": 1000},
-        {"n": "Ender 3 V3", "f": 1.1, "w": 350},
-        {"n": "CR-M4", "f": 0.98, "w": 800}
-    ],
-    "Artillery": [
-        {"n": "Sidewinder X4 Plus", "f": 0.98, "w": 500},
-        {"n": "Sidewinder X2", "f": 1.15, "w": 350}
-    ],
-    "Prusa": [
-        {"n": "MK4", "f": 0.9, "w": 300},
-        {"n": "XL", "f": 0.85, "w": 450},
-        {"n": "MK3S+", "f": 1.05, "w": 300}
-    ]
-}
-
-    # CONTEÚDO PRINCIPAL
+    # CONTEÚDO PRINCIPAL (LAYOUT EM BLOCOS)
     st.info("💡 Corpo interno sempre em branco para melhor reflexão do LED.")
     col_main, col_summary = st.columns([2, 1], gap="large")
 
@@ -129,27 +105,16 @@ if acesso_liberado:
             w = c3.number_input("Largura (cm)", value=32)
             p = c4.number_input("Profundidade (cm)", value=5)
 
-        # Bloco 2: Localização e Máquina
+        # Bloco 2: Configuração da Máquina
         with st.container():
-    st.markdown("### 📍 Localização e Impressora")
-    ca, cb, cc = st.columns(3)
-    
-    # Seleção de Estado (já configurado anteriormente)
-    estado_sel = ca.selectbox("Localização", options=list(base_regional.keys()))
-    
-    # Seleção de Marca Dinâmica
-    marca_sel = cb.selectbox("Marca", options=list(impressoras.keys()))
-    
-    # Seleção de Modelo baseada na Marca escolhida
-    modelo_sel = cc.selectbox(
-        "Modelo", 
-        options=impressoras[marca_sel], 
-        format_func=lambda x: f"{x['n']} ({x['w']}W)"
-    )
+            st.markdown("### ⚙️ Impressora 3D")
+            cb, cc = st.columns(2)
+            marca_sel = cb.selectbox("Marca", options=list(impressoras.keys()))
+            modelo_sel = cc.selectbox("Modelo", options=impressoras[marca_sel], format_func=lambda x: f"{x['n']} ({x['w']}W)")
 
         # Bloco 3: Materiais
         with st.container():
-            st.markdown("### 🧱 Materiais")
+            st.markdown("### 🧱 Materiais e Acabamento")
             m1, m2 = st.columns(2)
             face_val = m1.selectbox("Material da Face", [(35, "Policarbonato 2mm"), (15, "Acrílico 2mm")], format_func=lambda x: x[1])
             cor_face_val = m2.selectbox("Cor da Face", [(0, "Branca"), (20, "Colorida")], format_func=lambda x: x[1])
@@ -157,33 +122,40 @@ if acesso_liberado:
             fundo_val = m3.selectbox("Material do Fundo", [(15, "PVC 5mm"), (0, "Vazado")], format_func=lambda x: x[1])
             corpo_val = m4.selectbox("Material Corpo", [(130, "PETG (UV)"), (100, "PLA")], format_func=lambda x: x[1])
 
-    # CÁLCULOS
-    kwh, mult_mat = base_regional[estado_sel]
-    custo_mat_base = corpo_val[0] * mult_mat
-    preco_corpo = ((h * 2) + (w * 2)) * p * 0.17808 * modelo_sel['f'] * (custo_mat_base / 130)
-    energia = ((h + w) / 10) * modelo_sel['f'] * (modelo_sel['w'] / 1000) * kwh
+    # 4. LÓGICA DE CÁLCULO (Sem Localização - Valores Base Fixos)
+    custo_kwh_base = 0.85  # Valor médio de energia
+    mult_material_base = 1.0  # Multiplicador base de material
     
-    valor_unit = (preco_corpo + (face_val[0] * mult_mat) + (fundo_val[0] * mult_mat) + cor_face_val[0] + energia)
-    total_geral = valor_unit * qtd_letras
+    custo_mat_final = corpo_val[0] * mult_material_base
+    preco_corpo = ((h * 2) + (w * 2)) * p * 0.17808 * modelo_sel['f'] * (custo_mat_final / 130)
+    energia = ((h + w) / 10) * modelo_sel['f'] * (modelo_sel['w'] / 1000) * custo_kwh_base
+    
+    valor_unitario = (preco_corpo + (face_val[0] * mult_material_base) + (fundo_val[0] * mult_material_base) + cor_face_val[0] + energia)
+    total_geral = valor_unitario * qtd_letras
 
     with col_summary:
+        # Card de Orçamento
         st.markdown(f"""
             <div class="orcamento-card">
-                <span style="color: #58a6ff; font-weight: bold;">🏷️ ORÇAMENTO ESTIMADO</span>
-                <h1 style="color: #58a6ff; margin: 10px 0;">R$ {total_geral:,.2f}</h1>
-                <small>Unitário: <b>R$ {valor_unit:,.2f}/Un.</b></small>
+                <span style="color: #58a6ff; font-weight: bold; font-size: 0.9rem;">🏷️ ORÇAMENTO TOTAL</span>
+                <h1 style="color: #58a6ff; margin: 10px 0; font-size: 2.5rem;">R$ {total_geral:,.2f}</h1>
+                <p style="margin: 0;">Unitário: <b>R$ {valor_unitario:,.2f}/Un.</b></p>
             </div>
         """, unsafe_allow_html=True)
 
+        # Resumo Técnico
         with st.container():
-            st.markdown("### 📝 Resumo Técnico")
+            st.markdown("### 📝 Resumo")
             st.write(f"🔢 **Letras:** {qtd_letras}")
             st.write(f"📐 **Medidas:** {h}x{w}x{p} cm")
-            st.write(f"📍 **Tarifa:** {estado_sel} (R$ {kwh})")
+            st.write(f"⚙️ **Máquina:** {modelo_sel['n']}")
+            st.write(f"🧱 **Corpo:** {corpo_val[1]}")
 
+        # Botão de Impressão
         if st.button("💾 GERAR PDF / IMPRIMIR"):
             st.components.v1.html("<script>window.parent.focus(); window.parent.print();</script>", height=0)
 
 else:
     st.title("🔒 SISTEMA RESTRITO")
-    st.warning("Efetue o login na lateral.")
+    st.error("Acesso bloqueado. Verifique suas credenciais na barra lateral.")
+    st.sidebar.info("Acesso Admin: hugoadm / 1920")
