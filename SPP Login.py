@@ -81,9 +81,37 @@ if acesso_liberado:
     }
 
     impressoras = {
-        "Anycubic": [{"n": "Kobra 3 Max", "f": 0.95, "w": 550}, {"n": "Kobra 2 Max", "f": 1.0, "w": 500}],
-        "Creality": [{"n": "K1 Max", "f": 0.9, "w": 1000}, {"n": "Ender 3 V3", "f": 1.1, "w": 350}]
-    }
+    "Anycubic": [
+        {"n": "Kobra 3 Max", "f": 0.95, "w": 550},
+        {"n": "Kobra 2 Max", "f": 1.0, "w": 500},
+        {"n": "Kobra 2 Plus", "f": 1.05, "w": 450},
+        {"n": "Kobra Neo", "f": 1.3, "w": 350}
+    ],
+    "Elegoo": [
+        {"n": "Neptune 4 Max", "f": 0.95, "w": 500},
+        {"n": "Neptune 4 Plus", "f": 0.98, "w": 480},
+        {"n": "Neptune 4 Pro", "f": 1.02, "w": 400}
+    ],
+    "Bambu Lab": [
+        {"n": "X1-Carbon", "f": 0.85, "w": 350},
+        {"n": "P1S", "f": 0.88, "w": 350},
+        {"n": "A1", "f": 0.92, "w": 300}
+    ],
+    "Creality": [
+        {"n": "K1 Max", "f": 0.9, "w": 1000},
+        {"n": "Ender 3 V3", "f": 1.1, "w": 350},
+        {"n": "CR-M4", "f": 0.98, "w": 800}
+    ],
+    "Artillery": [
+        {"n": "Sidewinder X4 Plus", "f": 0.98, "w": 500},
+        {"n": "Sidewinder X2", "f": 1.15, "w": 350}
+    ],
+    "Prusa": [
+        {"n": "MK4", "f": 0.9, "w": 300},
+        {"n": "XL", "f": 0.85, "w": 450},
+        {"n": "MK3S+", "f": 1.05, "w": 300}
+    ]
+}
 
     # CONTEÚDO PRINCIPAL
     st.info("💡 Corpo interno sempre em branco para melhor reflexão do LED.")
@@ -103,11 +131,21 @@ if acesso_liberado:
 
         # Bloco 2: Localização e Máquina
         with st.container():
-            st.markdown("### 📍 Localização e Impressora")
-            ca, cb, cc = st.columns(3)
-            estado_sel = ca.selectbox("Localização", options=list(base_regional.keys()))
-            marca_sel = cb.selectbox("Marca", options=list(impressoras.keys()))
-            modelo_sel = cc.selectbox("Modelo", options=impressoras[marca_sel], format_func=lambda x: x['n'])
+    st.markdown("### 📍 Localização e Impressora")
+    ca, cb, cc = st.columns(3)
+    
+    # Seleção de Estado (já configurado anteriormente)
+    estado_sel = ca.selectbox("Localização", options=list(base_regional.keys()))
+    
+    # Seleção de Marca Dinâmica
+    marca_sel = cb.selectbox("Marca", options=list(impressoras.keys()))
+    
+    # Seleção de Modelo baseada na Marca escolhida
+    modelo_sel = cc.selectbox(
+        "Modelo", 
+        options=impressoras[marca_sel], 
+        format_func=lambda x: f"{x['n']} ({x['w']}W)"
+    )
 
         # Bloco 3: Materiais
         with st.container():
