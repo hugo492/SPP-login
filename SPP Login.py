@@ -1,23 +1,27 @@
-import streamlit as stimport streamlit as st
+import streamlit as st
 import pandas as pd
 
 # 1. CONFIGURAÇÃO DO SISTEMA
 st.set_page_config(page_title="SPP - SISTEMA DE PRECIFICAÇÃO PRO", layout="wide")
 
-# Link da sua planilha Google (em formato CSV)
-# Para gerar: Arquivo > Compartilhar > Publicar na Web > Escolha "Valores separados por vírgula (.csv)"
+# Substitua pela sua URL real do Google Sheets (exportada como CSV)
 URL_PLANILHA = "SUA_URL_DA_PLANILHA_CSV_AQUI"
 
 def verificar_acesso(email_digitado):
+    if not email_digitado:
+        return False
     try:
+        # Tenta ler a planilha
         df = pd.read_csv(URL_PLANILHA)
         lista_autorizada = df['email'].str.lower().str.strip().tolist()
         return email_digitado.lower().strip() in lista_autorizada
-    except:
+    except Exception as e:
+        # Se a planilha não for encontrada ou a coluna 'email' não existir
         return False
 
 # 2. INTERFACE DE LOGIN (BARRA LATERAL)
-st.sidebar.image("https://spp.uniplenotech.com.br/wp-content/uploads/2024/02/logo-spp.png", width=150) # Opcional: Sua logo
+# Use uma logo válida ou remova a linha abaixo se não tiver a imagem
+st.sidebar.image("https://spp.uniplenotech.com.br/wp-content/uploads/2024/02/logo-spp.png", width=150)
 st.sidebar.title("🔐 ÁREA DO ASSINANTE")
 
 email_user = st.sidebar.text_input("E-mail de Compra", placeholder="exemplo@email.com")
@@ -26,16 +30,15 @@ senha_mestre = st.sidebar.text_input("Chave de Ativação", type="password")
 # --- VALIDAÇÃO DE ACESSO ---
 if verificar_acesso(email_user) and senha_mestre == "HUGO2026":
     
-    st.sidebar.success(f"✅ Acesso Liberado!")
+    st.sidebar.success("✅ Acesso Liberado!")
     
-    # ---------------------------------------------------------
-    # TODO O SEU CÓDIGO DA CALCULADORA (PREVIEW, CÁLCULOS, ETC)
-    # ---------------------------------------------------------
     st.title("🚀 SPP - SISTEMA DE PRECIFICAÇÃO PRO")
     
     # Exemplo do início do seu sistema
     texto_preview = st.text_input("Texto do Letreiro", value="TEXTO LETREIRO").upper()
-    # ... (restante do código técnico aqui) ...
+    st.write(f"Visualização: {texto_preview}")
+    
+    # O RESTANTE DO SEU CÓDIGO DA CALCULADORA ENTRA AQUI
 
 else:
     # --- TELA DE BLOQUEIO E DIRECIONAMENTO PARA PAGAMENTO ---
@@ -74,4 +77,4 @@ else:
         st.info("Já é assinante? Insira seu e-mail e chave na barra lateral à esquerda.")
 
     st.sidebar.info("Dúvidas? Entre em contato com o suporte Unipleno.")
-    st.warning("🔒 Área restrita. Por favor, faça login para calcular seus orçamentos.")
+    st.sidebar.warning("🔒 Área restrita. Faça login para continuar.")
